@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BHARAT QUIZ — Test Your Knowledge</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Baloo+2:wght@400;600;800&family=Noto+Serif+Devanagari:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --saffron: #FF6B2B;
+    --deep-saffron: #E84A00;
+    --gold: #FFD700;
+    --emerald: #00C16E;
+    --navy: #0A0F2E;
+    --midnight: #060B20;
+    --white: #F5F0E8;
+    --glow-saffron: rgba(255,107,43,0.4);
+    --glow-gold: rgba(255,215,0,0.3);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    font-family: 'Rajdhani', sans-serif;
+    background: var(--midnight);
+    color: var(--white);
+    min-height: 100vh;
+    overflow-x: hidden;
+    cursor: default;
+  }
+
+  /* ANIMATED MANDALA BG */
+  .bg-canvas {
+    position: fixed; inset: 0; z-index: 0; overflow: hidden;
+  }
+  .mandala {
+    position: absolute;
+    border-radius: 50%;
+    border: 1px solid rgba(255,107,43,0.08);
+    animation: spin linear infinite;
+  }
+  .mandala:nth-child(1) { width:900px;height:900px;top:50%;left:50%;transform:translate(-50%,-50%);animation-duration:60s; }
+  .mandala:nth-child(2) { width:700px;height:700px;top:50%;left:50%;transform:translate(-50%,-50%);animation-duration:45s;animation-direction:reverse;border-color:rgba(255,215,0,0.06); }
+  .mandala:nth-child(3) { width:500px;height:500px;top:50%;left:50%;transform:translate(-50%,-50%);animation-duration:30s;border-color:rgba(0,193,110,0.05); }
+  .mandala:nth-child(4) { width:300px;height:300px;top:50%;left:50%;transform:translate(-50%,-50%);animation-duration:20s;animation-direction:reverse;border-color:rgba(255,107,43,0.1); }
+  .mandala::before, .mandala::after {
+    content:''; position:absolute; inset:0; border-radius:50%;
+    border: 1px dashed rgba(255,107,43,0.05);
+    transform: rotate(45deg);
+  }
+  @keyframes spin { from{transform:translate(-50%,-50%) rotate(0deg)} to{transform:translate(-50%,-50%) rotate(360deg)} }
+
+  .noise {
+    position:fixed;inset:0;z-index:1;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events:none; opacity:0.4;
+  }
+
+  /* PARTICLES */
+  .particle {
+    position:fixed; width:3px;height:3px; border-radius:50%;
+    background:var(--gold); opacity:0; z-index:1;
+    animation: float-up 4s ease-in infinite;
+  }
+  @keyframes float-up {
+    0%{opacity:0;transform:translateY(0) scale(0)}
+    20%{opacity:0.8}
+    80%{opacity:0.4}
+    100%{opacity:0;transform:translateY(-100px) scale(1.5)}
+  }
+
+  /* SCREEN SYSTEM */
+  .screen { position:relative;z-index:10;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px; }
+  .screen.hidden { display:none; }
+
+  /* ========== INTRO SCREEN ========== */
+  #intro {
+    gap: 0;
+    background: radial-gradient(ellipse at center, rgba(255,107,43,0.08) 0%, transparent 70%);
+  }
+
+  .title-block { text-align:center; position:relative; }
+
+  .devanagari-top {
+    font-family: 'Noto Serif Devanagari', serif;
+    font-size: clamp(14px, 3vw, 22px);
+    color: var(--gold);
+    letter-spacing: 0.3em;
+    opacity: 0.8;
+    margin-bottom: 8px;
+    animation: fadeSlideDown 0.8s ease forwards;
+  }
+
+  .main-title {
+    font-family: 'Baloo 2', cursive;
+    font-size: clamp(52px, 10vw, 110px);
+    font-weight: 800;
+    line-height: 0.9;
+    background: linear-gradient(135deg, var(--saffron) 0%, var(--gold) 50%, var(--saffron) 100%);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: shimmer 3s ease infinite, fadeSlideDown 0.8s 0.2s ease both;
+    filter: drop-shadow(0 0 40px rgba(255,107,43,0.5));
+    position: relative;
+  }
+  @keyframes shimmer { 0%,100%{background-position:0% 50%} 50%{background-position:100% 50%} }
+
+  .subtitle {
+    font-size: clamp(12px, 2.5vw, 18px);
+    letter-spacing: 0.5em;
+    color: rgba(245,240,232,0.5);
+    text-transform: uppercase;
+    margin-top: 6px;
+    animation: fadeSlideDown 0.8s 0.4s ease both;
+  }
+
+  .chakra-divider {
+    width: 60px; height: 60px;
+    margin: 30px auto;
+    animation: spin 8s linear infinite, fadeIn 1s 0.6s ease both;
+    position: relative;
+  }
+  .chakra-divider svg { width:100%;height:100%; }
+
+  .flag-bar {
+    display:flex; width:200px; height:6px; border-radius:3px; overflow:hidden; margin: 0 auto 30px;
+    animation: fadeIn 1s 0.8s ease both;
+    box-shadow: 0 0 20px rgba(255,107,43,0.5);
+  }
+  .flag-bar .f1{flex:1;background:#FF9933;}
+  .flag-bar .f2{flex:1;background:#fff;}
+  .flag-bar .f3{flex:1;background:#138808;}
+
+  /* DIFFICULTY CARDS */
+  .diff-title {
+    font-size: clamp(14px, 2vw, 18px);
+    letter-spacing: 0.3em;
+    color: rgba(245,240,232,0.6);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    animation: fadeIn 1s 1s ease both;
+  }
+
+  .diff-grid {
+    display: flex; gap: 16px; flex-wrap: wrap; justify-content: center;
+    animation: fadeSlideUp 0.8s 1.1s ease both;
+  }
+
+  .diff-card {
+    position: relative;
+    width: 160px; padding: 24px 16px;
+    border: 1px solid rgba(255,107,43,0.2);
+    border-radius: 16px;
+    cursor: pointer;
+    text-align: center;
+    background: rgba(10,15,46,0.8);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    overflow: hidden;
+  }
+  .diff-card::before {
+    content:''; position:absolute;inset:0;
+    background: linear-gradient(135deg, transparent, rgba(255,107,43,0.05));
+    opacity:0; transition:opacity 0.3s;
+  }
+  .diff-card:hover { transform:translateY(-8px) scale(1.05); border-color:var(--saffron); box-shadow:0 20px 60px rgba(255,107,43,0.3); }
+  .diff-card:hover::before { opacity:1; }
+  .diff-card.selected { border-color:var(--gold); background:rgba(255,215,0,0.08); box-shadow:0 0 30px rgba(255,215,0,0.4); }
+
+  .diff-icon { font-size: 36px; margin-bottom: 10px; display:block; }
+  .diff-name { font-family:'Baloo 2',cursive; font-size:20px; font-weight:800; display:block; margin-bottom:4px; }
+  .diff-desc { font-size:12px; color:rgba(245,240,232,0.5); letter-spacing:0.05em; display:block; }
+
+  .diff-card[data-diff="easy"] .diff-name { color: var(--emerald); }
+  .diff-card[data-diff="medium"] .diff-name { color: var(--gold); }
+  .diff-card[data-diff="hard"] .diff-name { color: var(--saffron); }
+  .diff-card[data-diff="expert"] .diff-name { color: #FF4444; }
+
+  .start-btn {
+    margin-top: 36px;
+    padding: 18px 60px;
+    font-family: 'Baloo 2', cursive;
+    font-size: 22px; font-weight: 800;
+    letter-spacing: 0.1em;
+    border: none; border-radius: 50px;
+    background: linear-gradient(135deg, var(--saffron), var(--deep-saffron));
+    color: #fff;
+    cursor: pointer;
+    position: relative; overflow: hidden;
+    box-shadow: 0 8px 40px rgba(255,107,43,0.5);
+    transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    animation: fadeSlideUp 0.8s 1.3s ease both;
+  }
+  .start-btn::before {
+    content:''; position:absolute;inset:0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent);
+    transform:translateX(-100%); transition:transform 0.4s;
+  }
+  .start-btn:hover { transform:translateY(-4px) scale(1.05); box-shadow:0 16px 60px rgba(255,107,43,0.7); }
+  .start-btn:hover::before { transform:translateX(100%); }
+  .start-btn:disabled { opacity:0.4; cursor:not-allowed; transform:none; }
+
+  /* ========== QUIZ SCREEN ========== */
+  #quiz { gap: 0; }
+
+  .quiz-header {
+    width:100%;max-width:800px;
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 20px 0 24px;
+  }
+
+  .q-counter {
+    font-family:'Baloo 2',cursive; font-size:28px; font-weight:800;
+    color: var(--saffron);
+  }
+  .q-counter span { color:rgba(245,240,232,0.3); font-size:18px; }
+
+  .score-display {
+    display:flex; align-items:center; gap:8px;
+    background: rgba(255,215,0,0.1);
+    border:1px solid rgba(255,215,0,0.3);
+    padding: 8px 20px; border-radius:50px;
+  }
+  .score-display .score-num {
+    font-family:'Baloo 2',cursive; font-size:22px; font-weight:800; color:var(--gold);
+  }
+  .score-display .score-label { font-size:13px; color:rgba(245,240,232,0.5); letter-spacing:0.1em; }
+
+  /* PROGRESS */
+  .progress-track {
+    width:100%; max-width:800px;
+    height:6px; background:rgba(255,255,255,0.08);
+    border-radius:3px; overflow:hidden; margin-bottom:28px;
+  }
+  .progress-fill {
+    height:100%; background:linear-gradient(90deg,var(--saffron),var(--gold));
+    border-radius:3px; transition:width 0.6s cubic-bezier(0.34,1.56,0.64,1);
+    box-shadow: 0 0 10px rgba(255,215,0,0.5);
+  }
+
+  /* TIMER */
+  .timer-ring { position:relative; width:70px;height:70px; flex-shrink:0; }
+  .timer-ring svg { transform:rotate(-90deg); }
+  .timer-ring .ring-bg { fill:none; stroke:rgba(255,255,255,0.08); stroke-width:4; }
+  .timer-ring .ring-fill { fill:none; stroke:var(--saffron); stroke-width:4; stroke-linecap:round; transition:stroke-dashoffset 1s linear, stroke 0.3s; }
+  .timer-num {
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    font-family:'Baloo 2',cursive; font-size:20px; font-weight:800; color:var(--white);
+  }
+
+  /* QUESTION CARD */
+  .question-card {
+    width:100%;max-width:800px;
+    background: rgba(10,15,46,0.9);
+    border:1px solid rgba(255,107,43,0.2);
+    border-radius:24px; padding:36px;
+    position:relative; overflow:hidden;
+    backdrop-filter:blur(20px);
+    animation: cardIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+    box-shadow: 0 0 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
+  }
+  .question-card::before {
+    content:''; position:absolute;top:0;left:0;right:0;height:3px;
+    background: linear-gradient(90deg, var(--saffron), var(--gold), var(--emerald));
+  }
+  @keyframes cardIn { from{opacity:0;transform:translateY(30px) scale(0.96)} to{opacity:1;transform:none} }
+
+  .q-category {
+    font-size:11px; letter-spacing:0.3em; text-transform:uppercase;
+    color:var(--saffron); margin-bottom:14px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .q-category::after { content:''; flex:1; height:1px; background:rgba(255,107,43,0.2); }
+
+  .q-text {
+    font-family:'Baloo 2',cursive;
+    font-size: clamp(18px, 3vw, 26px);
+    font-weight:600; line-height:1.4;
+    margin-bottom:32px; color:var(--white);
+  }
+
+  .options-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  @media(max-width:600px){ .options-grid{grid-template-columns:1fr;} }
+
+  .option-btn {
+    position:relative; overflow:hidden;
+    padding:18px 20px;
+    border:1px solid rgba(255,107,43,0.15);
+    border-radius:14px;
+    background: rgba(255,255,255,0.03);
+    color:var(--white);
+    font-family:'Rajdhani',sans-serif; font-size:16px; font-weight:500;
+    cursor:pointer; text-align:left;
+    transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1);
+    display:flex; align-items:center; gap:12px;
+  }
+  .option-btn:hover:not(:disabled) {
+    border-color:rgba(255,107,43,0.5);
+    background:rgba(255,107,43,0.08);
+    transform:translateX(4px);
+    box-shadow:0 4px 20px rgba(255,107,43,0.2);
+  }
+  .option-letter {
+    width:32px;height:32px;border-radius:50%;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    background:rgba(255,107,43,0.15);
+    font-size:13px;font-weight:700;color:var(--saffron);
+    transition:all 0.25s;
+  }
+  .option-btn:hover .option-letter { background:var(--saffron);color:#fff; }
+
+  .option-btn.correct {
+    border-color:var(--emerald); background:rgba(0,193,110,0.1);
+    animation:pulse-green 0.5s ease;
+  }
+  .option-btn.correct .option-letter { background:var(--emerald);color:#fff; }
+  .option-btn.wrong {
+    border-color:#FF4444; background:rgba(255,68,68,0.1);
+    animation:shake 0.4s ease;
+  }
+  .option-btn.wrong .option-letter { background:#FF4444;color:#fff; }
+  .option-btn:disabled { cursor:not-allowed; }
+
+  @keyframes pulse-green { 0%,100%{box-shadow:none} 50%{box-shadow:0 0 30px rgba(0,193,110,0.5)} }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
+
+  /* EXPLANATION */
+  .explanation-box {
+    margin-top:18px; padding:16px 20px;
+    border-radius:12px; border:1px solid rgba(255,215,0,0.2);
+    background:rgba(255,215,0,0.05);
+    font-size:14px; line-height:1.6; color:rgba(245,240,232,0.8);
+    animation:fadeSlideUp 0.4s ease;
+    display:none;
+  }
+  .explanation-box.show { display:block; }
+  .explanation-box strong { color:var(--gold); }
+
+  /* NEXT BTN */
+  .next-btn {
+    margin-top:24px; align-self:flex-end;
+    padding:14px 40px;
+    font-family:'Baloo 2',cursive; font-size:18px; font-weight:800;
+    border:none; border-radius:50px;
+    background:linear-gradient(135deg, var(--saffron), var(--deep-saffron));
+    color:#fff; cursor:pointer;
+    box-shadow:0 6px 30px rgba(255,107,43,0.4);
+    transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    display:none; animation:fadeSlideUp 0.4s ease;
+  }
+  .next-btn.show { display:inline-flex; align-items:center; gap:8px; }
+  .next-btn:hover { transform:translateY(-3px) scale(1.05); box-shadow:0 12px 40px rgba(255,107,43,0.6); }
+
+  /* ========== RESULT SCREEN ========== */
+  #result { text-align:center; gap:0; }
+
+  .result-ring {
+    position:relative; width:180px; height:180px; margin:0 auto 30px;
+    animation:scaleIn 0.8s cubic-bezier(0.34,1.56,0.64,1) 0.3s both;
+  }
+  .result-ring svg { transform:rotate(-90deg); }
+  .result-ring .ring-bg2 { fill:none; stroke:rgba(255,255,255,0.06); stroke-width:10; }
+  .result-ring .ring-score { fill:none; stroke-width:10; stroke-linecap:round; transition:stroke-dashoffset 1.5s cubic-bezier(0.34,1.56,0.64,1) 0.5s; }
+  .result-center {
+    position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  }
+  .result-pct { font-family:'Baloo 2',cursive; font-size:40px; font-weight:800; color:var(--gold); }
+  .result-pct-label { font-size:12px; letter-spacing:0.15em; color:rgba(245,240,232,0.4); }
+
+  .result-title {
+    font-family:'Baloo 2',cursive; font-size:clamp(32px,7vw,64px); font-weight:800;
+    background:linear-gradient(135deg,var(--saffron),var(--gold));
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+    animation:fadeSlideDown 0.8s 0.6s ease both;
+    margin-bottom:8px;
+  }
+
+  .result-subtitle { font-size:16px; color:rgba(245,240,232,0.5); letter-spacing:0.1em; animation:fadeIn 0.8s 0.8s ease both; margin-bottom:30px; }
+
+  .result-stats {
+    display:flex; gap:20px; justify-content:center; flex-wrap:wrap;
+    animation:fadeSlideUp 0.8s 1s ease both; margin-bottom:36px;
+  }
+  .stat-pill {
+    padding:14px 28px; border-radius:50px;
+    border:1px solid rgba(255,107,43,0.2);
+    background:rgba(10,15,46,0.8);
+    display:flex; flex-direction:column; align-items:center; gap:2px;
+  }
+  .stat-pill .sn { font-family:'Baloo 2',cursive; font-size:26px; font-weight:800; color:var(--saffron); }
+  .stat-pill .sl { font-size:11px; letter-spacing:0.2em; color:rgba(245,240,232,0.4); text-transform:uppercase; }
+
+  .play-again-btn {
+    padding:18px 60px;
+    font-family:'Baloo 2',cursive; font-size:22px; font-weight:800;
+    border:none; border-radius:50px;
+    background:linear-gradient(135deg, var(--saffron), var(--deep-saffron));
+    color:#fff; cursor:pointer;
+    box-shadow:0 8px 40px rgba(255,107,43,0.5);
+    transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    animation:fadeSlideUp 0.8s 1.2s ease both;
+  }
+  .play-again-btn:hover { transform:translateY(-4px) scale(1.05); box-shadow:0 16px 60px rgba(255,107,43,0.7); }
+
+  /* CONFETTI */
+  .confetti-piece {
+    position:fixed; width:8px; height:8px; z-index:100;
+    animation:confetti-fall 3s ease-in forwards;
+    border-radius:2px;
+  }
+  @keyframes confetti-fall {
+    0%{transform:translateY(-20px) rotate(0deg);opacity:1}
+    100%{transform:translateY(100vh) rotate(720deg);opacity:0}
+  }
+
+  /* UTILITIES */
+  @keyframes fadeSlideDown { from{opacity:0;transform:translateY(-20px)} to{opacity:1;transform:none} }
+  @keyframes fadeSlideUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:none} }
+  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+  @keyframes scaleIn { from{opacity:0;transform:scale(0.5)} to{opacity:1;transform:scale(1)} }
+
+  .streak-badge {
+    position:fixed;top:20px;left:50%;transform:translateX(-50%);
+    background:linear-gradient(135deg,var(--saffron),var(--gold));
+    padding:10px 30px; border-radius:50px;
+    font-family:'Baloo 2',cursive; font-size:18px; font-weight:800; color:#fff;
+    z-index:50; animation:streakPop 2s ease forwards;
+    box-shadow:0 8px 40px rgba(255,107,43,0.6);
+  }
+  @keyframes streakPop { 0%{opacity:0;top:60px;} 15%{opacity:1;top:20px;} 80%{opacity:1;top:20px;} 100%{opacity:0;top:-60px;} }
+
+  @media(max-width:600px){
+    .quiz-header{flex-wrap:wrap;gap:10px;}
+    .question-card{padding:22px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- BACKGROUND -->
+<div class="bg-canvas">
+  <div class="mandala"></div>
+  <div class="mandala"></div>
+  <div class="mandala"></div>
+  <div class="mandala"></div>
+</div>
+<div class="noise"></div>
+
+<!-- PARTICLES -->
+<div id="particles"></div>
+
+<!-- ===== INTRO SCREEN ===== -->
+<div class="screen" id="intro">
+  <div class="title-block">
+    <div class="devanagari-top">भारत ज्ञान प्रतियोगिता</div>
+    <div class="main-title">BHARAT<br>QUIZ</div>
+    <div class="subtitle">India &amp; General Knowledge Challenge</div>
+  </div>
+
+  <div class="chakra-divider">
+    <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="30" cy="30" r="28" stroke="rgba(255,107,43,0.3)" stroke-width="1"/>
+      <circle cx="30" cy="30" r="20" stroke="rgba(255,215,0,0.3)" stroke-width="1"/>
+      <circle cx="30" cy="30" r="5" fill="rgba(255,107,43,0.4)"/>
+      <g stroke="rgba(255,107,43,0.5)" stroke-width="1.5" stroke-linecap="round">
+        <line x1="30" y1="2" x2="30" y2="10"/>
+        <line x1="30" y1="50" x2="30" y2="58"/>
+        <line x1="2" y1="30" x2="10" y2="30"/>
+        <line x1="50" y1="30" x2="58" y2="30"/>
+        <line x1="7.7" y1="7.7" x2="13.3" y2="13.3"/>
+        <line x1="46.7" y1="46.7" x2="52.3" y2="52.3"/>
+        <line x1="52.3" y1="7.7" x2="46.7" y2="13.3"/>
+        <line x1="13.3" y1="46.7" x2="7.7" y2="52.3"/>
+      </g>
+    </svg>
+  </div>
+
+  <div class="flag-bar"><div class="f1"></div><div class="f2"></div><div class="f3"></div></div>
+
+  <div class="diff-title">Choose Your Difficulty</div>
+
+  <div class="diff-grid">
+    <div class="diff-card" data-diff="easy">
+      <span class="diff-icon">🌼</span>
+      <span class="diff-name">Easy</span>
+      <span class="diff-desc">Beginner friendly<br>30 seconds/question</span>
+    </div>
+    <div class="diff-card" data-diff="medium">
+      <span class="diff-icon">⚡</span>
+      <span class="diff-name">Medium</span>
+      <span class="diff-desc">Some thinking required<br>20 seconds/question</span>
+    </div>
+    <div class="diff-card" data-diff="hard">
+      <span class="diff-icon">🔥</span>
+      <span class="diff-name">Hard</span>
+      <span class="diff-desc">Know your India<br>15 seconds/question</span>
+    </div>
+    <div class="diff-card" data-diff="expert">
+      <span class="diff-icon">💀</span>
+      <span class="diff-name">Expert</span>
+      <span class="diff-desc">For true scholars<br>10 seconds/question</span>
+    </div>
+  </div>
+
+  <button class="start-btn" id="startBtn" disabled>SELECT DIFFICULTY TO BEGIN ▶</button>
+</div>
+
+<!-- ===== QUIZ SCREEN ===== -->
+<div class="screen hidden" id="quiz">
+  <div class="quiz-header">
+    <div class="q-counter">Q<span id="qNum">1</span> <span>/ <span id="qTotal">10</span></span></div>
+    <div class="timer-ring">
+      <svg viewBox="0 0 70 70">
+        <circle class="ring-bg" cx="35" cy="35" r="30"/>
+        <circle class="ring-fill" id="timerRing" cx="35" cy="35" r="30" stroke-dasharray="188.5" stroke-dashoffset="0"/>
+      </svg>
+      <div class="timer-num" id="timerNum">30</div>
+    </div>
+    <div class="score-display">
+      <span class="score-num" id="scoreNum">0</span>
+      <span class="score-label">PTS</span>
+    </div>
+  </div>
+
+  <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+
+  <div class="question-card" id="questionCard">
+    <div class="q-category" id="qCategory">INDIA — HISTORY</div>
+    <div class="q-text" id="qText">Loading question...</div>
+    <div class="options-grid" id="optionsGrid"></div>
+    <div class="explanation-box" id="explanationBox"></div>
+  </div>
+
+  <button class="next-btn" id="nextBtn">NEXT QUESTION →</button>
+</div>
+
+<!-- ===== RESULT SCREEN ===== -->
+<div class="screen hidden" id="result">
+  <div class="result-ring">
+    <svg viewBox="0 0 180 180" width="180" height="180">
+      <circle class="ring-bg2" cx="90" cy="90" r="80"/>
+      <circle class="ring-score" id="resultRing" cx="90" cy="90" r="80" stroke-dasharray="502.6" stroke-dashoffset="502.6"/>
+    </svg>
+    <div class="result-center">
+      <div class="result-pct" id="resultPct">0%</div>
+      <div class="result-pct-label">SCORE</div>
+    </div>
+  </div>
+
+  <div class="result-title" id="resultTitle">Well Done!</div>
+  <div class="result-subtitle" id="resultSubtitle">You're getting there</div>
+
+  <div class="result-stats">
+    <div class="stat-pill"><span class="sn" id="statCorrect">0</span><span class="sl">Correct</span></div>
+    <div class="stat-pill"><span class="sn" id="statWrong">0</span><span class="sl">Wrong</span></div>
+    <div class="stat-pill"><span class="sn" id="statScore">0</span><span class="sl">Points</span></div>
+    <div class="stat-pill"><span class="sn" id="statStreak">0</span><span class="sl">Best Streak</span></div>
+  </div>
+
+  <button class="play-again-btn" onclick="resetGame()">🔄 PLAY AGAIN</button>
+</div>
+
+<script>
+// ========== QUESTIONS DATABASE ==========
+const allQuestions = {
+  easy: [
+    { category:"INDIA — GEOGRAPHY", q:"What is the capital of India?", opts:["Mumbai","New Delhi","Kolkata","Chennai"], a:0, exp:"New Delhi has been India's capital since 1911 when the British moved it from Calcutta." },
+    { category:"INDIA — SYMBOLS", q:"What is the national animal of India?", opts:["Lion","Elephant","Bengal Tiger","Leopard"], a:2, exp:"The Bengal Tiger was adopted as India's national animal in 1973 under Project Tiger." },
+    { category:"INDIA — GEOGRAPHY", q:"Which river is considered the holiest in India?", opts:["Yamuna","Brahmaputra","Ganga (Ganges)","Godavari"], a:2, exp:"The Ganga is revered as the holiest river in Hinduism and is a cultural symbol of India." },
+    { category:"GENERAL KNOWLEDGE", q:"How many continents are there on Earth?", opts:["5","6","7","8"], a:2, exp:"Earth has 7 continents: Africa, Antarctica, Asia, Australia, Europe, North America, and South America." },
+    { category:"INDIA — HISTORY", q:"Who was the first Prime Minister of India?", opts:["Mahatma Gandhi","B.R. Ambedkar","Sardar Patel","Jawaharlal Nehru"], a:3, exp:"Jawaharlal Nehru served as India's first Prime Minister from 1947 to 1964." },
+    { category:"GENERAL KNOWLEDGE", q:"Which planet is known as the Red Planet?", opts:["Venus","Jupiter","Mars","Saturn"], a:2, exp:"Mars appears reddish due to iron oxide (rust) on its surface, earning it the nickname Red Planet." },
+    { category:"INDIA — CULTURE", q:"What does 'Namaste' mean?", opts:["Goodbye","I bow to you","Welcome","Thank you"], a:1, exp:"Namaste comes from Sanskrit meaning 'I bow to the divine in you.' It's a respectful greeting." },
+    { category:"INDIA — GEOGRAPHY", q:"Which is the largest state in India by area?", opts:["Maharashtra","Uttar Pradesh","Rajasthan","Madhya Pradesh"], a:2, exp:"Rajasthan is the largest Indian state by area at about 342,239 sq km, covering over 10% of India's total area." },
+    { category:"GENERAL KNOWLEDGE", q:"What is the chemical symbol for water?", opts:["H2O","CO2","NaCl","O2"], a:0, exp:"Water (H₂O) consists of two hydrogen atoms bonded to one oxygen atom." },
+    { category:"INDIA — FESTIVALS", q:"Which festival is known as the 'Festival of Lights' in India?", opts:["Holi","Eid","Diwali","Navratri"], a:2, exp:"Diwali celebrates the victory of light over darkness and good over evil, with oil lamps lit across homes." }
+  ],
+  medium: [
+    { category:"INDIA — HISTORY", q:"In which year did India gain independence from British rule?", opts:["1945","1947","1950","1942"], a:1, exp:"India became independent on August 15, 1947, when the British transferred power after 200 years of colonial rule." },
+    { category:"INDIA — MONUMENTS", q:"Which city is the Taj Mahal located in?", opts:["Delhi","Jaipur","Agra","Lucknow"], a:2, exp:"The Taj Mahal in Agra was built by Mughal emperor Shah Jahan between 1631–1653 in memory of his wife Mumtaz Mahal." },
+    { category:"INDIA — GEOGRAPHY", q:"Which mountain range separates India from China and Tibet?", opts:["Aravalli","Western Ghats","Vindhya","Himalayas"], a:3, exp:"The Himalayas, world's highest mountain range, form India's northern border with China and Nepal." },
+    { category:"GENERAL KNOWLEDGE", q:"What is the largest ocean on Earth?", opts:["Atlantic","Indian","Arctic","Pacific"], a:3, exp:"The Pacific Ocean covers about 165 million sq km, more than all land areas on Earth combined." },
+    { category:"INDIA — SPORTS", q:"Which sport did India win its first Olympic gold medal in 1928?", opts:["Wrestling","Hockey","Cricket","Archery"], a:1, exp:"India's men's field hockey team won gold at the 1928 Amsterdam Olympics, beginning a legendary run of 8 Olympic gold medals." },
+    { category:"INDIA — ECONOMY", q:"What is the currency of India?", opts:["Rupiah","Rupee","Taka","Rial"], a:1, exp:"The Indian Rupee (INR), symbolized ₹, has been India's official currency since independence." },
+    { category:"GENERAL KNOWLEDGE", q:"Who painted the Mona Lisa?", opts:["Michelangelo","Vincent van Gogh","Leonardo da Vinci","Raphael"], a:2, exp:"Leonardo da Vinci painted the Mona Lisa between approximately 1503–1519. It now hangs in the Louvre, Paris." },
+    { category:"INDIA — SCIENCE", q:"Which Indian scientist discovered the 'Raman Effect'?", opts:["Homi Bhabha","APJ Abdul Kalam","CV Raman","Jagadish Chandra Bose"], a:2, exp:"Sir CV Raman discovered the Raman Effect in 1928, for which he won the Nobel Prize in Physics in 1930." },
+    { category:"INDIA — GEOGRAPHY", q:"Which is the longest river that flows entirely within India?", opts:["Ganga","Godavari","Narmada","Krishna"], a:1, exp:"The Godavari at ~1,465 km is the longest river flowing entirely within India, often called the 'Dakshin Ganga.'" },
+    { category:"GENERAL KNOWLEDGE", q:"What is the smallest country in the world by area?", opts:["Monaco","San Marino","Vatican City","Liechtenstein"], a:2, exp:"Vatican City, covering just 0.44 sq km within Rome, is the world's smallest sovereign state." }
+  ],
+  hard: [
+    { category:"INDIA — HISTORY", q:"The Jallianwala Bagh massacre took place in which year?", opts:["1915","1919","1921","1923"], a:1, exp:"On April 13, 1919, British General Dyer ordered troops to open fire at a peaceful gathering in Amritsar, killing hundreds." },
+    { category:"INDIA — CONSTITUTION", q:"How many Fundamental Rights are recognized in the Indian Constitution?", opts:["5","6","7","8"], a:1, exp:"The Indian Constitution recognizes 6 Fundamental Rights: Right to Equality, Freedom, Against Exploitation, Religion, Education & Culture, and Constitutional Remedies." },
+    { category:"INDIA — GEOGRAPHY", q:"The Tropic of Cancer passes through how many Indian states?", opts:["6","7","8","9"], a:2, exp:"The Tropic of Cancer passes through 8 Indian states: Gujarat, Rajasthan, MP, Chhattisgarh, Jharkhand, West Bengal, Tripura, and Mizoram." },
+    { category:"GENERAL KNOWLEDGE", q:"What is the speed of light in vacuum (approximately)?", opts:["3×10⁶ m/s","3×10⁸ m/s","3×10⁵ m/s","3×10⁷ m/s"], a:1, exp:"Light travels at approximately 299,792,458 m/s (≈3×10⁸ m/s) in a vacuum." },
+    { category:"INDIA — RULERS", q:"Who was the last Mughal Emperor of India?", opts:["Aurangzeb","Shah Jahan","Bahadur Shah Zafar","Akbar"], a:2, exp:"Bahadur Shah Zafar II was the last Mughal Emperor. After the 1857 revolt, the British exiled him to Rangoon where he died in 1862." },
+    { category:"INDIA — SPACE", q:"What was the name of India's first artificial satellite?", opts:["Rohini","Aryabhata","Bhaskara","INSAT-1A"], a:1, exp:"Aryabhata, launched on April 19, 1975, was India's first satellite, named after the ancient mathematician." },
+    { category:"GENERAL KNOWLEDGE", q:"Which element has the atomic number 79?", opts:["Silver","Platinum","Gold","Copper"], a:2, exp:"Gold (Au) has atomic number 79. It's one of the least reactive elements and has been prized throughout human history." },
+    { category:"INDIA — ECONOMY", q:"The Reserve Bank of India was established in which year?", opts:["1930","1935","1947","1949"], a:1, exp:"The RBI was established on April 1, 1935 under the Reserve Bank of India Act, 1934." },
+    { category:"INDIA — LITERATURE", q:"Who wrote the Indian national anthem 'Jana Gana Mana'?", opts:["Bankim Chandra Chatterjee","Rabindranath Tagore","Sarojini Naidu","Subramanya Bharati"], a:1, exp:"Rabindranath Tagore wrote Jana Gana Mana in Bengali. It was officially adopted as India's national anthem on January 24, 1950." },
+    { category:"GENERAL KNOWLEDGE", q:"The Pythagorean theorem states: in a right triangle, a²+b²=c². Who first proved it?", opts:["Euclid","Pythagoras","Archimedes","Brahmagupta"], a:1, exp:"While Babylonians knew the relationship, Pythagoras (570–495 BC) is credited with the first mathematical proof." }
+  ],
+  expert: [
+    { category:"INDIA — HISTORY", q:"During the Indus Valley Civilization, which city had the world's first known urban sanitation system?", opts:["Harappa","Mohenjo-daro","Lothal","Dholavira"], a:1, exp:"Mohenjo-daro (2500 BCE) had an advanced drainage and sanitation system with covered drains lining every street — unprecedented in the ancient world." },
+    { category:"INDIA — CONSTITUTION", q:"Who chaired the Drafting Committee of the Indian Constitution?", opts:["Jawaharlal Nehru","Rajendra Prasad","BR Ambedkar","Vallabhbhai Patel"], a:2, exp:"Dr. BR Ambedkar chaired the 7-member Drafting Committee. The Constitution took 2 years 11 months to complete and was adopted on November 26, 1949." },
+    { category:"INDIA — SCIENCE", q:"The number system including zero was first developed in India by which mathematician?", opts:["Aryabhata","Brahmagupta","Bhaskara II","Mahavira"], a:1, exp:"Brahmagupta (598–668 CE) was the first to formally define zero as a number and establish rules for arithmetic with zero." },
+    { category:"GENERAL KNOWLEDGE", q:"What is the name of the deepest point in Earth's oceans?", opts:["Puerto Rico Trench","Java Trench","Mariana Trench (Challenger Deep)","Tonga Trench"], a:2, exp:"Challenger Deep in the Mariana Trench reaches ~10,935m depth, making it the deepest known point in Earth's oceans." },
+    { category:"INDIA — ECONOMICS", q:"Which Five-Year Plan introduced the concept of 'Garibi Hatao' (Remove Poverty)?", opts:["3rd Plan","4th Plan","5th Plan","6th Plan"], a:2, exp:"The 5th Five Year Plan (1974–1979) under Indira Gandhi introduced 'Garibi Hatao,' focusing on poverty alleviation and self-reliance." },
+    { category:"INDIA — GEOGRAPHY", q:"Aksai Chin, currently administered by China, was historically part of which Indian state?", opts:["Himachal Pradesh","Uttarakhand","Jammu & Kashmir","Ladakh (formerly J&K)"], a:3, exp:"Aksai Chin was historically part of the princely state of Jammu & Kashmir and is claimed by India as part of Ladakh (carved out in 2019)." },
+    { category:"GENERAL KNOWLEDGE", q:"Which country first granted women the right to vote nationally?", opts:["USA","UK","New Zealand","Australia"], a:2, exp:"New Zealand became the first self-governing country to grant women the right to vote in 1893, though women couldn't stand for Parliament until 1919." },
+    { category:"INDIA — ART", q:"The Natyashastra, an ancient treatise on performing arts, was written by whom?", opts:["Kalidasa","Bharata Muni","Valmiki","Vyasa"], a:1, exp:"Bharata Muni authored the Natyashastra (~200 BCE–200 CE), a comprehensive treatise covering drama, dance, and music — the foundation of classical Indian arts." },
+    { category:"INDIA — SPACE", q:"Chandrayaan-3's Vikram lander made a historic soft landing near the lunar south pole in which year?", opts:["2020","2021","2023","2022"], a:2, exp:"On August 23, 2023, Chandrayaan-3's Vikram lander touched down near the Moon's south pole, making India the 4th nation to land on the Moon." },
+    { category:"GENERAL KNOWLEDGE", q:"The Fibonacci sequence's ratio between consecutive large numbers approximates which mathematical constant?", opts:["Pi (π)","Euler's Number (e)","Golden Ratio (φ)","Square root of 2"], a:2, exp:"As Fibonacci numbers grow, their ratio approaches φ ≈ 1.618..., the Golden Ratio, which appears throughout nature, art, and architecture." }
+  ]
+};
+
+// ========== GAME STATE ==========
+let state = {
+  difficulty: null,
+  questions: [],
+  current: 0,
+  score: 0,
+  correct: 0,
+  wrong: 0,
+  streak: 0,
+  bestStreak: 0,
+  answered: false,
+  timer: null,
+  timeLeft: 30,
+  timeLimits: { easy:30, medium:20, hard:15, expert:10 }
+};
+
+// ========== PARTICLES ==========
+function createParticles() {
+  const container = document.getElementById('particles');
+  for (let i = 0; i < 20; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.cssText = `left:${Math.random()*100}%;bottom:${Math.random()*30}%;animation-delay:${Math.random()*4}s;animation-duration:${3+Math.random()*3}s;background:${Math.random()>0.5?'#FFD700':'#FF6B2B'};`;
+    container.appendChild(p);
+  }
+}
+createParticles();
+
+// ========== DIFFICULTY SELECTION ==========
+document.querySelectorAll('.diff-card').forEach(card => {
+  card.addEventListener('click', () => {
+    document.querySelectorAll('.diff-card').forEach(c => c.classList.remove('selected'));
+    card.classList.add('selected');
+    state.difficulty = card.dataset.diff;
+    const btn = document.getElementById('startBtn');
+    btn.disabled = false;
+    btn.textContent = `START ${state.difficulty.toUpperCase()} QUIZ ▶`;
+  });
+});
+
+document.getElementById('startBtn').addEventListener('click', startQuiz);
+
+// ========== START QUIZ ==========
+function startQuiz() {
+  const qs = [...allQuestions[state.difficulty]];
+  state.questions = qs.sort(() => Math.random()-0.5);
+  state.current = 0; state.score = 0; state.correct = 0;
+  state.wrong = 0; state.streak = 0; state.bestStreak = 0;
+
+  document.getElementById('qTotal').textContent = state.questions.length;
+  showScreen('quiz');
+  loadQuestion();
+}
+
+// ========== SCREEN MANAGEMENT ==========
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+}
+
+// ========== LOAD QUESTION ==========
+function loadQuestion() {
+  const q = state.questions[state.current];
+  state.answered = false;
+
+  document.getElementById('qNum').textContent = state.current + 1;
+  document.getElementById('qCategory').textContent = q.category;
+  document.getElementById('qText').textContent = q.q;
+  document.getElementById('progressFill').style.width = `${(state.current/state.questions.length)*100}%`;
+
+  const explanationBox = document.getElementById('explanationBox');
+  explanationBox.classList.remove('show');
+
+  document.getElementById('nextBtn').classList.remove('show');
+
+  // Re-animate card
+  const card = document.getElementById('questionCard');
+  card.style.animation = 'none';
+  card.offsetHeight;
+  card.style.animation = 'cardIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both';
+
+  // Build options
+  const grid = document.getElementById('optionsGrid');
+  grid.innerHTML = '';
+  const letters = ['A','B','C','D'];
+  q.opts.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = `<span class="option-letter">${letters[i]}</span>${opt}`;
+    btn.style.animationDelay = `${i*0.08}s`;
+    btn.style.animation = `fadeSlideUp 0.4s ${i*0.08}s ease both`;
+    btn.addEventListener('click', () => selectAnswer(i, q.a, q.exp));
+    grid.appendChild(btn);
+  });
+
+  startTimer(state.timeLimits[state.difficulty]);
+}
+
+// ========== TIMER ==========
+function startTimer(seconds) {
+  clearInterval(state.timer);
+  state.timeLeft = seconds;
+  const ring = document.getElementById('timerRing');
+  const numEl = document.getElementById('timerNum');
+  const circumference = 188.5;
+
+  function updateTimer() {
+    const pct = state.timeLeft / seconds;
+    ring.style.strokeDashoffset = circumference * (1 - pct);
+    numEl.textContent = state.timeLeft;
+    ring.style.stroke = state.timeLeft <= 5 ? '#FF4444' : state.timeLeft <= 10 ? '#FFD700' : '#FF6B2B';
+
+    if (state.timeLeft <= 0) {
+      clearInterval(state.timer);
+      if (!state.answered) timeOut();
+    }
+    state.timeLeft--;
+  }
+  updateTimer();
+  state.timer = setInterval(updateTimer, 1000);
+}
+
+// ========== SELECT ANSWER ==========
+function selectAnswer(chosen, correct, explanation) {
+  if (state.answered) return;
+  state.answered = true;
+  clearInterval(state.timer);
+
+  const btns = document.querySelectorAll('.option-btn');
+  btns.forEach(b => b.disabled = true);
+
+  if (chosen === correct) {
+    btns[chosen].classList.add('correct');
+    const pts = calcPoints();
+    state.score += pts;
+    state.correct++;
+    state.streak++;
+    if (state.streak > state.bestStreak) state.bestStreak = state.streak;
+    document.getElementById('scoreNum').textContent = state.score;
+    if (state.streak >= 3) showStreak();
+  } else {
+    btns[chosen].classList.add('wrong');
+    btns[correct].classList.add('correct');
+    state.wrong++;
+    state.streak = 0;
+  }
+
+  const expBox = document.getElementById('explanationBox');
+  expBox.innerHTML = `<strong>💡 Did you know?</strong> ${explanation}`;
+  expBox.classList.add('show');
+
+  document.getElementById('nextBtn').classList.add('show');
+}
+
+function calcPoints() {
+  const baseMap = { easy:100, medium:150, hard:200, expert:300 };
+  const base = baseMap[state.difficulty];
+  const timeBonus = Math.floor(state.timeLeft * 5);
+  const streakBonus = state.streak * 10;
+  return base + timeBonus + streakBonus;
+}
+
+function timeOut() {
+  state.answered = true;
+  const btns = document.querySelectorAll('.option-btn');
+  btns.forEach(b => b.disabled = true);
+  btns[state.questions[state.current].a].classList.add('correct');
+  state.wrong++;
+  state.streak = 0;
+
+  const expBox = document.getElementById('explanationBox');
+  expBox.innerHTML = `<strong>⏱ Time's up!</strong> ${state.questions[state.current].exp}`;
+  expBox.classList.add('show');
+  document.getElementById('nextBtn').classList.add('show');
+}
+
+// ========== STREAK BADGE ==========
+function showStreak() {
+  const badge = document.createElement('div');
+  badge.className = 'streak-badge';
+  badge.textContent = `🔥 ${state.streak}x Streak! +${state.streak*10} bonus`;
+  document.body.appendChild(badge);
+  setTimeout(() => badge.remove(), 2000);
+}
+
+// ========== NEXT BUTTON ==========
+document.getElementById('nextBtn').addEventListener('click', () => {
+  state.current++;
+  if (state.current < state.questions.length) {
+    loadQuestion();
+  } else {
+    showResult();
+  }
+});
+
+// ========== SHOW RESULT ==========
+function showResult() {
+  showScreen('result');
+
+  const total = state.questions.length;
+  const pct = Math.round((state.correct / total) * 100);
+
+  document.getElementById('resultPct').textContent = pct + '%';
+  document.getElementById('statCorrect').textContent = state.correct;
+  document.getElementById('statWrong').textContent = state.wrong;
+  document.getElementById('statScore').textContent = state.score;
+  document.getElementById('statStreak').textContent = state.bestStreak;
+
+  let title, subtitle, color;
+  if (pct === 100) { title='PERFECT! 🏆'; subtitle='You are a true Bharat scholar!'; color='#FFD700'; }
+  else if (pct >= 80) { title='EXCELLENT! 🌟'; subtitle='Outstanding knowledge!'; color='#00C16E'; }
+  else if (pct >= 60) { title='WELL DONE! ⚡'; subtitle='Above average performance!'; color='#FF6B2B'; }
+  else if (pct >= 40) { title='NOT BAD! 📚'; subtitle='Keep learning and try again!'; color='#FFD700'; }
+  else { title='KEEP TRYING! 💪'; subtitle='Every quiz makes you smarter!'; color='#FF4444'; }
+
+  document.getElementById('resultTitle').textContent = title;
+  document.getElementById('resultSubtitle').textContent = subtitle;
+
+  const ring = document.getElementById('resultRing');
+  ring.style.stroke = color;
+  setTimeout(() => {
+    ring.style.strokeDashoffset = 502.6 * (1 - pct/100);
+  }, 300);
+
+  if (pct >= 60) launchConfetti();
+}
+
+// ========== CONFETTI ==========
+function launchConfetti() {
+  const colors = ['#FF6B2B','#FFD700','#00C16E','#FF4444','#fff','#FF9933'];
+  for (let i = 0; i < 60; i++) {
+    setTimeout(() => {
+      const c = document.createElement('div');
+      c.className = 'confetti-piece';
+      c.style.cssText = `left:${Math.random()*100}%;top:-10px;background:${colors[Math.floor(Math.random()*colors.length)]};animation-duration:${2+Math.random()*2}s;animation-delay:0s;border-radius:${Math.random()>0.5?'50%':'2px'};transform:rotate(${Math.random()*360}deg)`;
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 4000);
+    }, i * 50);
+  }
+}
+
+// ========== RESET GAME ==========
+function resetGame() {
+  state = { difficulty:null, questions:[], current:0, score:0, correct:0, wrong:0, streak:0, bestStreak:0, answered:false, timer:null, timeLeft:30, timeLimits:{easy:30,medium:20,hard:15,expert:10} };
+  document.querySelectorAll('.diff-card').forEach(c => c.classList.remove('selected'));
+  const btn = document.getElementById('startBtn');
+  btn.disabled = true;
+  btn.textContent = 'SELECT DIFFICULTY TO BEGIN ▶';
+  clearInterval(state.timer);
+  showScreen('intro');
+}
+</script>
+</body>
+</html>
